@@ -11,8 +11,8 @@ module Webhooks
         case params['highlight']
         when 'delivered'
           story_delivered
-        when 'accepted'
-          story_accepted
+        when 'accepted', 'rejected'
+          story_complete
         end
       end
 
@@ -42,8 +42,8 @@ module Webhooks
       puts response.body
     end
 
-    def story_accepted
-      puts 'STORY ACCEPTED'
+    def story_complete
+      puts 'STORY ACCEPTED OR REJECTED'
 
       num_stories = firebase.get(story_count_path).body
       response = firebase.update(day_path, { storiesDelivered: num_stories - 1 })
