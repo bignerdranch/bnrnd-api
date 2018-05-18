@@ -6,9 +6,7 @@ ruby '2.5.1'
 gem 'rails', '~> 5.2.0'
 gem 'puma', '~> 3.11'
 gem 'httparty'
-
-# Reduces boot times through caching; required in config/boot.rb
-gem 'bootsnap', '>= 1.1.0', require: false
+gem 'firebase'
 
 group :development do
   gem 'dotenv-rails'
