@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'firebase_client'
+
 module Webhooks
   class PivotalTrackerController < ApplicationController
     def receive_webhook
@@ -19,12 +21,34 @@ module Webhooks
 
     private
 
+    def day_path
+      'projectData/sprints/0/days/0'
+    end
+
+    def story_count_path
+      "#{day_path}/storiesDelivered"
+    end
+
+    def firebase
+      @firebase ||= FirebaseClient.create
+    end
+
     def story_delivered
       puts 'STORY DELIVERED'
+
+      num_stories = firebase.get(story_count_path).body
+      response = firebase.update(day_path, { storiesDelivered: num_stories + 1 })
+      puts response.success?
+      puts response.body
     end
 
     def story_accepted
       puts 'STORY ACCEPTED'
+
+      num_stories = firebase.get(story_count_path).body
+      response = firebase.update(day_path, { storiesDelivered: num_stories - 1 })
+      puts response.success?
+      puts response.body
     end
   end
 end
