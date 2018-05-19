@@ -9,10 +9,8 @@ module Webhooks
 
       if story_update
         case params['highlight']
-        when 'delivered'
-          story_delivered
         when 'accepted', 'rejected'
-          story_complete
+          story_complete(params['highlight'])
         end
       end
 
@@ -21,32 +19,29 @@ module Webhooks
 
     private
 
-    def day_path
-      'projectData/sprints/0/days/0'
+    def story_events_path
+      'projectData/storyEvents'
     end
 
-    def story_count_path
-      "#{day_path}/storiesDelivered"
+    def story_event_index_path(index)
+      "#{story_events_path}/#{index}"
     end
 
     def firebase
       @firebase ||= FirebaseClient.create
     end
 
-    def story_delivered
-      puts 'STORY DELIVERED'
-
-      num_stories = firebase.get(story_count_path).body
-      response = firebase.update(day_path, { storiesDelivered: num_stories + 1 })
-      puts response.success?
-      puts response.body
-    end
-
-    def story_complete
+    def story_complete(type)
       puts 'STORY ACCEPTED OR REJECTED'
 
-      num_stories = firebase.get(story_count_path).body
-      response = firebase.update(day_path, { storiesDelivered: num_stories - 1 })
+      story_events = firebase.get(story_events_path)
+      new_index = story_events.body.count
+
+      story_event_data = {
+        date: DateTime.now.strftime('%Y-%m-%d'),
+        type: type,
+      }
+      response = firebase.set(story_event_index_path(new_index), story_event_data)
       puts response.success?
       puts response.body
     end
