@@ -24,23 +24,29 @@ module Webhooks
 
     private
 
-    def day_path
-      'projectData/sprints/0/days/0'
+    def prs_path
+      'projectData/pullRequests'
     end
 
-    def commits_path
-      "#{day_path}/commits"
+    def pr_index_path(index)
+      "#{prs_path}/#{index}"
     end
 
     def firebase
       @firebase ||= FirebaseClient.create
     end
 
-    def commits_merged(num_merged_commits)
+    def commits_merged(num_commits)
       puts 'PR MERGED'
 
-      num_day_commits = firebase.get(commits_path).body
-      response = firebase.update(day_path, { commits: num_day_commits + num_merged_commits })
+      prs = firebase.get(prs_path)
+      new_index = prs.body.count
+
+      pr_data = {
+        date: DateTime.now.strftime('%Y-%m-%d'),
+        commits: num_commits,
+      }
+      response = firebase.set(pr_index_path(new_index), pr_data)
       puts response.success?
       puts response.body
     end
